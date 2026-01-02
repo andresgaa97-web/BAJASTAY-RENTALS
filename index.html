@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BajaStay Rentals | Luxury Experiences</title>
+
+    <!-- Meta SEO -->
+    <meta name="description"
+        content="Descubre las casas de renta más exclusivas en Baja California Sur. BajaStay Rentals ofrece lujo, confort y experiencias únicas frente al mar.">
+    <link rel="icon" href="favicon.ico">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Mapbox -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header id="main-header">
+        <div class="logo">
+            <div class="logo-icon"></div>
+            <div class="logo-text">BAJASTAY RENTALS</div>
+        </div>
+        <nav class="nav-links">
+            <a href="#properties">Casas</a>
+            <a href="#map-section">Ubicaciones</a>
+            <a href="#testimonials">Reseñas</a>
+            <a href="#contact">Contacto</a>
+        </nav>
+        <div class="header-right">
+            <a href="https://andresgaa97-web.github.io/Mi-proyecto/" target="_blank" class="cyber-btn">
+                MI PROYECTO AR
+            </a>
+            <a href="#properties" class="airbnb-btn" style="border-radius: 50px;">RESERVAR AHORA</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <p class="tagline">BIENVENIDO A BAJASTAY RENTALS</p>
+            <h1>EXPERIENCIAS ÚNICAS EN BAJA CALIFORNIA SUR</h1>
+            <a href="#properties" class="cta-btn">DESCUBRIR PROPIEDADES</a>
+        </div>
+    </section>
+
+    <section id="properties" class="section-container">
+        <div class="section-title">
+            <p>NUESTRA COLECCIÓN</p>
+            <h2>PROPIEDADES EXCLUSIVAS</h2>
+        </div>
+
+        <div class="properties-grid" id="properties-container">
+            <!-- Las casas se cargarán dinámicamente aquí -->
+        </div>
+    </section>
+
+    <section id="map-section" class="section-container">
+        <div class="section-title">
+            <p>EXPLORA LA ZONA</p>
+            <h2>UBICACIONES ESTRATÉGICAS</h2>
+        </div>
+        <div id="map"></div>
+    </section>
+
+    <section id="testimonials" class="section-container">
+        <div class="section-title">
+            <p>LO QUE DICEN NUESTROS HUÉSPEDES</p>
+            <h2>EXPERIENCIAS REALES</h2>
+        </div>
+        <div class="testimonials-grid" id="testimonials-container">
+            <!-- Testimonios dinámicos -->
+        </div>
+    </section>
+
+    <section id="contact" class="section-container">
+        <div class="section-title">
+            <p>¿TIENES DUDAS?</p>
+            <h2>CONTÁCTANOS</h2>
+        </div>
+        <div class="contact-container">
+            <form id="contact-form">
+                <div class="form-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" class="form-input" placeholder="Tu nombre..." required>
+                </div>
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" class="form-input" placeholder="tu@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Mensaje</label>
+                    <textarea class="form-input" rows="5" placeholder="¿En qué podemos ayudarte?" required></textarea>
+                </div>
+                <button type="submit" class="submit-btn" id="submit-btn">ENVIAR MENSAJE</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="logo" style="justify-content: center; margin-bottom: 30px;">
+            <div class="logo-icon"></div>
+            <div class="logo-text">BAJASTAY</div>
+        </div>
+        <div class="footer-socials">
+            <a href="#" class="social-link">IG</a>
+            <a href="#" class="social-link">FB</a>
+            <a href="#" class="social-link">WA</a>
+        </div>
+        <p class="copyright">© 2026 BAJASTAY RENTALS. TODOS LOS DERECHOS RESERVADOS.</p>
+    </footer>
+
+    <!-- MODAL DE GALERÍA -->
+    <div id="gallery-modal" class="gallery-modal">
+        <div class="gallery-content">
+            <span class="close-gallery" onclick="closeGallery()">&times;</span>
+            <img id="gallery-img" class="gallery-main-img" src="" alt="Galería">
+            <div class="gallery-nav">
+                <button class="nav-btn" onclick="prevImg()">&#10094;</button>
+                <button class="nav-btn" onclick="nextImg()">&#10095;</button>
+            </div>
+            <div id="gallery-counter" class="gallery-counter">1 / 5</div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // Extraer datos de la variable global definida en data.js
+        const { properties, testimonials } = window.BAJASTAY_DATA;
+        let currentPropImages = [];
+        let currentImgIndex = 0;
+
+        // Configuración Mapbox
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYW5keWc5NyIsImEiOiJjbWpwN20zcGoyYjFzM2ZveTIzZ2s5Mm56In0.FsNncSP8DrD6zTXpw0MaEg';
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v11',
+            center: [-110.391059, 24.095362],
+            zoom: 14,
+            pitch: 50,
+            bearing: -10
+        });
+
+        const container = document.getElementById('properties-container');
+        const testContainer = document.getElementById('testimonials-container');
+
+        function renderAll() {
+            // Render Propiedades
+            container.innerHTML = properties.map(p => `
+                <div class="property-card" onclick="focusMap([${p.coordinates}], '${p.name}')">
+                    <div class="property-img">
+                        <img src="${p.images[0]}" alt="${p.name}" loading="lazy">
+                        <span class="property-badge">★ ${p.rating}</span>
+                    </div>
+                    <div class="property-info">
+                        <h3>${p.name}</h3>
+                        <p class="location">📍 ${p.location}</p>
+                        <p style="color: #888; font-size: 14px; margin-bottom: 20px;">${p.description}</p>
+                        
+                        <div class="property-stats">
+                            <span>👥 ${p.guests} Pers.</span>
+                            <span>🛏️ ${p.beds} Hab.</span>
+                            <span>🚿 ${p.baths} Baños</span>
+                        </div>
+                        
+                        <div class="property-price">
+                            <div class="price-box">
+                                <span>${p.price}</span>
+                                <small>/ noche</small>
+                            </div>
+                        </div>
+
+                        <div class="property-actions">
+                            <button class="secondary-btn" onclick="event.stopPropagation(); openGallery(${p.id})">VER FOTOS</button>
+                            <a href="${p.airbnb_link}" target="_blank" class="airbnb-btn" onclick="event.stopPropagation()">RESERVAR</a>
+                            ${p.isPrincipal ? `<a href="https://andresgaa97-web.github.io/Mi-proyecto/" target="_blank" class="special-btn" onclick="event.stopPropagation()">INICIAR RUTA</a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Render Testimonios
+            testContainer.innerHTML = testimonials.map(t => `
+                <div class="testimonial-card">
+                    <div style="color: var(--accent); margin-bottom: 15px;">
+                        ${'★'.repeat(t.rating)}
+                    </div>
+                    <p>"${t.review}"</p>
+                    <div class="testimonial-user">
+                        <div class="user-avatar">${t.name[0]}</div>
+                        <div style="font-weight: 600;">${t.name}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Add AIRBNB STYLE Price Markers
+            properties.forEach(p => {
+                const el = document.createElement('div');
+                el.className = `price-marker ${p.isPrincipal ? 'is-principal' : ''}`;
+                el.innerText = p.price;
+
+                new mapboxgl.Marker({ element: el, anchor: 'center' })
+                    .setLngLat(p.coordinates)
+                    .setPopup(new mapboxgl.Popup({ offset: 25 })
+                        .setHTML(`
+                        <div class="popup-card">
+                            <div class="popup-img" style="background-image: url('${p.images[0]}')"></div>
+                            <div class="popup-info">
+                                <h3>${p.name}</h3>
+                                <p>👥 ${p.guests} Huéspedes · ${p.rating} ★</p>
+                                <div class="property-actions" style="margin-top:10px;">
+                                    <button class="secondary-btn" style="padding: 5px 10px; font-size: 11px;" onclick="openGallery(${p.id})">FOTOS</button>
+                                    <a href="${p.airbnb_link}" target="_blank" class="airbnb-btn" style="padding: 5px 10px; font-size: 11px;">RESERVAR</a>
+                                    ${p.isPrincipal ? `<a href="https://andresgaa97-web.github.io/Mi-proyecto/" target="_blank" class="special-btn" style="padding: 5px 10px; font-size: 10px;">MI PROYECTO</a>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `))
+                    .addTo(map);
+            });
+
+            initScrollReveal();
+        }
+
+        // --- LÓGICA DE GALERÍA ---
+        window.openGallery = (id) => {
+            const prop = properties.find(p => p.id === id);
+            currentPropImages = prop.images;
+            currentImgIndex = 0;
+            updateGalleryUI();
+            document.getElementById('gallery-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Evita scroll
+        };
+
+        window.closeGallery = () => {
+            document.getElementById('gallery-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+
+        window.nextImg = () => {
+            currentImgIndex = (currentImgIndex + 1) % currentPropImages.length;
+            updateGalleryUI();
+        };
+
+        window.prevImg = () => {
+            currentImgIndex = (currentImgIndex - 1 + currentPropImages.length) % currentPropImages.length;
+            updateGalleryUI();
+        };
+
+        function updateGalleryUI() {
+            document.getElementById('gallery-img').src = currentPropImages[currentImgIndex];
+            document.getElementById('gallery-counter').innerText = `${currentImgIndex + 1} / ${currentPropImages.length}`;
+        }
+
+        window.focusMap = (coords, name) => {
+            map.flyTo({
+                center: coords,
+                zoom: 17,
+                pitch: 45,
+                duration: 2500
+            });
+            document.getElementById('map-section').scrollIntoView();
+        };
+
+        // Scroll Reveal Animation Logic
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.property-card, .testimonial-card, .contact-container, .section-title').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'all 0.8s ease-out';
+                observer.observe(el);
+            });
+        }
+
+        // Efecto parallax hero
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('main-header');
+            const hero = document.querySelector('.hero');
+            const scroll = window.scrollY;
+
+            if (scroll > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+
+            if (hero && scroll < window.innerHeight) {
+                hero.style.backgroundPositionY = `${scroll * 0.5}px`;
+            }
+        });
+
+        document.getElementById('contact-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.innerText = 'ENVIANDO...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                alert('¡Mensaje enviado con éxito!');
+                btn.innerText = 'ENVIAR MENSAJE';
+                btn.disabled = false;
+                e.target.reset();
+            }, 1500);
+        });
+
+        document.addEventListener('DOMContentLoaded', renderAll);
+    </script>
+</body>
+
+</html>
